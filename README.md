@@ -1,3 +1,15 @@
+# Managing Async State in React
+
+This repo is aimed to be a guide for those learning how to fetch data with React, a handful of libraries available and how each solution manages this differently.  
+
+This example project will be broken down into a few branches:
+
+- Main 
+- React State + Hooks
+- Redux
+- React Query
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
