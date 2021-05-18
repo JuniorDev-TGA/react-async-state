@@ -4,10 +4,10 @@ This repo is aimed to be a guide for those learning how to fetch data with React
 
 This example project will be broken down into a few branches:
 
-- Main 
-- React State + Hooks
-- Redux
-- React Query
+- `master`
+- `react-hooks`
+- `redux-thunk`
+- `react-query`
 
 
 # Getting Started with Create React App
