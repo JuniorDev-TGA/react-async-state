@@ -9,43 +9,14 @@ import {
   Text,
 } from "@mantine/core";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getAllUsers } from "../store/selectors";
-import { fetchAllUsers, selectUser } from "../store/actions";
+import { useQuery } from "react-query";
+import { usersApi } from "../api/usersApi";
 import UserEditForm from "./UserEditForm";
 
 function UsersList() {
-  const dispatch = useDispatch();
-  const users = useSelector(getAllUsers);
-  const error = useSelector((state) => state.users.error);
-  const isLoading = useSelector((state) => state.users.isLoading);
+  const { data, isLoading, error } = useQuery("users", usersApi.getUsers);
   const [editModalOpened, setEditModalOpened] = React.useState(false);
-
-  React.useEffect(() => {
-    dispatch(fetchAllUsers());
-  }, [dispatch]);
-  
-  const rows = users.map((user) => (
-    <tr key={user.id}>
-      <td>{user.id}</td>
-      <td>{user.email}</td>
-      <td>{user.first_name}</td>
-      <td>{user.last_name}</td>
-      <td>
-        <Image src={user.avatar} height={50} width={50} />
-      </td>
-      <td>
-        <Button
-          onClick={() => {
-            setEditModalOpened(true);
-            dispatch(selectUser(user.id));
-          }}
-        >
-          Edit
-        </Button>
-      </td>
-    </tr>
-  ));
+  const [selectedUserId, setSelectedUserId] = React.useState();
 
   if (error)
     return (
@@ -65,6 +36,8 @@ function UsersList() {
       </Alert>
     );
 
+  if (!data) return <>No Data!</>;
+
   return (
     <>
       <Title style={{ marginBottom: "60px" }}>Users</Title>
@@ -80,14 +53,39 @@ function UsersList() {
             <th></th>
           </tr>
         </thead>
-        <tbody>{rows}</tbody>
+        <tbody>
+          {data.map((user) => (
+            <tr key={user.id}>
+              <td>{user.id}</td>
+              <td>{user.email}</td>
+              <td>{user.first_name}</td>
+              <td>{user.last_name}</td>
+              <td>
+                <Image src={user.avatar} height={50} width={50} />
+              </td>
+              <td>
+                <Button
+                  onClick={() => {
+                    setEditModalOpened(true);
+                    setSelectedUserId(user.id);
+                  }}
+                >
+                  Edit
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </Table>
       <Modal
         opened={editModalOpened}
         onClose={() => setEditModalOpened(false)}
         title="Update Details"
       >
-        <UserEditForm onSuccess={() => setEditModalOpened(false)} />
+        <UserEditForm
+          onSuccess={() => setEditModalOpened(false)}
+          selectedUserId={selectedUserId}
+        />
       </Modal>
     </>
   );

@@ -8,15 +8,14 @@ import {
   LoadingOverlay,
   ElementsGroup,
 } from "@mantine/core";
-import { getSelectedUser } from "../store/selectors";
-import { useSelector, useDispatch } from "react-redux";
-import { setUser } from "../store/actions";
+import { useMutation, useQueryClient } from "react-query";
+import { usersApi } from "../api/usersApi";
 
-function UserEditForm({ onSuccess }) {
-  const dispatch = useDispatch();
-  const user = useSelector(getSelectedUser);
-  const error = useSelector((state) => state.users.error);
-  const isLoading = useSelector((state) => state.users.isLoading);
+function UserEditForm({ selectedUserId, onSuccess }) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isLoading, error } = useMutation(usersApi.updateUser);
+  const users = queryClient.getQueryData("users");
+  const user = users.find((user) => user.id === selectedUserId);
 
   const form = useForm({
     initialValues: { ...user },
@@ -29,7 +28,8 @@ function UserEditForm({ onSuccess }) {
   });
 
   const handleSubmit = async (values) => {
-    dispatch(setUser(values));
+    await mutateAsync(values);
+    queryClient.invalidateQueries("users");
     onSuccess();
   };
 

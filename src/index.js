@@ -1,16 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { MantineProvider } from "@mantine/core";
-import { Provider } from "react-redux";
+import { QueryClientProvider, QueryClient } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 import App from "./components/App";
-import store from './store/store'
+
+const client = new QueryClient();
 
 ReactDOM.render(
   <MantineProvider theme={{ colorScheme: "dark" }}>
-    <Provider store={store}>
+    <QueryClientProvider client={client}>
       <App />
-    </Provider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </MantineProvider>,
   document.getElementById("root")
 );

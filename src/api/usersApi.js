@@ -12,7 +12,7 @@ export const usersApi = {
   getUsers: async () => {
     await fakeNetworkDelay(1000);
     const response = await axios.get(`${baseUrl}/users`);
-    return response.data;
+    return response.data.data;
   },
   updateUser: (user) => {
     return axios.patch(`${baseUrl}/users/${user.id}`, user);
