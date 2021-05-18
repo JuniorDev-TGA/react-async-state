@@ -8,11 +8,15 @@ import {
   LoadingOverlay,
   ElementsGroup,
 } from "@mantine/core";
-import { usersApi } from "../api/usersApi";
+import { getSelectedUser } from "../store/selectors";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../store/actions";
 
-function UserEditForm({ user, onSuccess }) {
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
+function UserEditForm({ onSuccess }) {
+  const dispatch = useDispatch();
+  const user = useSelector(getSelectedUser);
+  const error = useSelector((state) => state.users.error);
+  const isLoading = useSelector((state) => state.users.isLoading);
 
   const form = useForm({
     initialValues: { ...user },
@@ -25,13 +29,8 @@ function UserEditForm({ user, onSuccess }) {
   });
 
   const handleSubmit = async (values) => {
-    try {
-      setLoading(true);
-      await usersApi.updateUser(values);
-      onSuccess();
-    } catch (error) {
-      setError(null);
-    }
+    dispatch(setUser(values));
+    onSuccess();
   };
 
   return (
@@ -41,7 +40,7 @@ function UserEditForm({ user, onSuccess }) {
       style={{ position: "relative", overflow: "hidden" }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <LoadingOverlay visible={loading} />
+        <LoadingOverlay visible={isLoading} />
         <div style={{ display: "flex", marginBottom: 15 }}>
           <TextInput
             required

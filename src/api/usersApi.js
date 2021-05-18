@@ -11,9 +11,10 @@ function fakeNetworkDelay(ms) {
 export const usersApi = {
   getUsers: async () => {
     await fakeNetworkDelay(1000);
-    return axios.get(`${baseUrl}/users`);
+    const response = await axios.get(`${baseUrl}/users`);
+    return response.data;
   },
   updateUser: (user) => {
-    return axios.patch(`${baseUrl}/users/${user.id}`);
+    return axios.patch(`${baseUrl}/users/${user.id}`, user);
   },
 };

@@ -9,32 +9,23 @@ import {
   Text,
 } from "@mantine/core";
 import React from "react";
-import { usersApi } from "../api/usersApi";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllUsers } from "../store/selectors";
+import { fetchAllUsers, selectUser } from "../store/actions";
 import UserEditForm from "./UserEditForm";
 
 function UsersList() {
-  const [data = [], setData] = React.useState();
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
-  const [selectedUser, setSelectedUser] = React.useState();
+  const dispatch = useDispatch();
+  const users = useSelector(getAllUsers);
+  const error = useSelector((state) => state.users.error);
+  const isLoading = useSelector((state) => state.users.isLoading);
   const [editModalOpened, setEditModalOpened] = React.useState(false);
 
   React.useEffect(() => {
-    async function fetchUsers() {
-      try {
-        setLoading(true);
-        const response = await usersApi.getUsers();
-        setData(response.data.data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUsers();
-  }, [setData]);
-
-  const rows = data.map((user) => (
+    dispatch(fetchAllUsers());
+  }, [dispatch]);
+  
+  const rows = users.map((user) => (
     <tr key={user.id}>
       <td>{user.id}</td>
       <td>{user.email}</td>
@@ -47,7 +38,7 @@ function UsersList() {
         <Button
           onClick={() => {
             setEditModalOpened(true);
-            setSelectedUser(user);
+            dispatch(selectUser(user.id));
           }}
         >
           Edit
@@ -77,8 +68,8 @@ function UsersList() {
   return (
     <>
       <Title style={{ marginBottom: "60px" }}>Users</Title>
+      <LoadingOverlay visible={isLoading} />
       <Table>
-        <LoadingOverlay visible={loading} />
         <thead>
           <tr>
             <th>Id</th>
@@ -89,17 +80,14 @@ function UsersList() {
             <th></th>
           </tr>
         </thead>
-        {<tbody>{rows}</tbody>}
+        <tbody>{rows}</tbody>
       </Table>
       <Modal
         opened={editModalOpened}
         onClose={() => setEditModalOpened(false)}
         title="Update Details"
       >
-        <UserEditForm
-          onSuccess={() => setEditModalOpened(false)}
-          user={selectedUser}
-        />
+        <UserEditForm onSuccess={() => setEditModalOpened(false)} />
       </Modal>
     </>
   );
