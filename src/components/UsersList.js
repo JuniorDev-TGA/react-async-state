@@ -1,43 +1,108 @@
-import { Title, Table } from "@mantine/core";
-import { useAsync } from "../hooks/useAsync";
+import {
+  Title,
+  Table,
+  Image,
+  Button,
+  Modal,
+  LoadingOverlay,
+  Alert,
+  Text,
+} from "@mantine/core";
+import React from "react";
 import { usersApi } from "../api/usersApi";
+import UserEditForm from "./UserEditForm";
 
-const elements = [
-  { position: 6, mass: 12.011, symbol: "C", name: "Carbon" },
-  { position: 7, mass: 14.007, symbol: "N", name: "Nitrogen" },
-  { position: 39, mass: 88.906, symbol: "Y", name: "Yttrium" },
-  { position: 56, mass: 137.33, symbol: "Ba", name: "Barium" },
-  { position: 58, mass: 140.12, symbol: "Ce", name: "Cerium" },
-];
+function UsersList() {
+  const [data = [], setData] = React.useState();
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [selectedUser, setSelectedUser] = React.useState();
+  const [editModalOpened, setEditModalOpened] = React.useState(false);
 
-function UserList() {
-  const { data } = useAsync(usersApi.getUsers);
+  React.useEffect(() => {
+    async function fetchUsers() {
+      try {
+        setLoading(true);
+        const response = await usersApi.getUsers();
+        setData(response.data.data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUsers();
+  }, [setData]);
 
-  const rows = elements.map((element) => (
-    <tr key={element.name}>
-      <td>{element.position}</td>
-      <td>{element.name}</td>
-      <td>{element.symbol}</td>
-      <td>{element.mass}</td>
+  const rows = data.map((user) => (
+    <tr key={user.id}>
+      <td>{user.id}</td>
+      <td>{user.email}</td>
+      <td>{user.first_name}</td>
+      <td>{user.last_name}</td>
+      <td>
+        <Image src={user.avatar} height={50} width={50} />
+      </td>
+      <td>
+        <Button
+          onClick={() => {
+            setEditModalOpened(true);
+            setSelectedUser(user);
+          }}
+        >
+          Edit
+        </Button>
+      </td>
     </tr>
   ));
+
+  if (error)
+    return (
+      <Alert
+        color="red"
+        title="Something went wrong"
+        style={{ width: "50%", margin: "auto", marginTop: 40 }}
+      >
+        Application crashed, try refreshing the page, if it does not help please
+        contact our support
+        <br />
+        <br />
+        Error message:
+        <Text color="red" size="sm">
+          undefined is not a function
+        </Text>
+      </Alert>
+    );
+
   return (
     <>
-      <Title>Users</Title>
-
+      <Title style={{ marginBottom: "60px" }}>Users</Title>
       <Table>
+        <LoadingOverlay visible={loading} />
         <thead>
           <tr>
-            <th>Element position</th>
-            <th>Element name</th>
-            <th>Symbol</th>
-            <th>Atomic mass</th>
+            <th>Id</th>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Avatar</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody>{rows}</tbody>
+        {<tbody>{rows}</tbody>}
       </Table>
+      <Modal
+        opened={editModalOpened}
+        onClose={() => setEditModalOpened(false)}
+        title="Update Details"
+      >
+        <UserEditForm
+          onSuccess={() => setEditModalOpened(false)}
+          user={selectedUser}
+        />
+      </Modal>
     </>
   );
 }
 
-export default UserList;
+export default UsersList;

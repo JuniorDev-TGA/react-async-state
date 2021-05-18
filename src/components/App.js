@@ -1,4 +1,4 @@
-import UserList from "./UsersList";
+import UsersList from "./UsersList";
 import { createUseStyles } from 'react-jss';
 import { theming } from '@mantine/core';
 
@@ -16,7 +16,7 @@ const useStyles = createUseStyles(
 
 function App() {
   useStyles();
-  return <UserList />;
+  return <UsersList />;
 }
 
 export default App;
